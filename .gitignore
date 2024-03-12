@@ -1,0 +1,13 @@
+# OS generated files #
+.DS_Store
+Thumbs.db
+
+# Node.js dependencies #
+/node_modules
+
+# Expo files #
+/.expo
+/.expo-shared
+.web
+ios/Exponent
+web-build
