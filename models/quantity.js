@@ -16,6 +16,10 @@ const quantitySchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    otherType:{
+        type: Number,
+        required: true,
+    },
     date: {
         type: {
             day: {

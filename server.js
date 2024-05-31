@@ -9,10 +9,10 @@ const port = 3000 || process.env.PORT;
 
 
 app.post('/add', async (req,res)=>{
-    const {normalQuantity,otherQuantity} = req.body;
+    const {normalQuantity,otherQuantity, otherType} = req.body; 
     try {
         const quantitySchema = await quantity({
-            normalQuantity,otherQuantity
+            normalQuantity,otherQuantity, otherType
         })
         const saveQuantity = await quantitySchema.save();
         res.json("success");
@@ -38,6 +38,48 @@ app.post('/get-data', async (req, res) => {
         res.status(500).json({ error: 'An error occurred' }); 
     }
 });
+
+app.post('/get-ag-data', async (req, res) => {
+    try {
+        const aggregateData = await quantity.aggregate([
+            {
+                $group: {
+                    _id: {
+                        year: '$date.year',
+                        month: '$date.month',
+                    },
+                    totalNormalQuantity: { $sum: '$normalQuantity' },
+                    totalSaariQuantity: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ['$otherType', 2] }, // Saari
+                                '$otherQuantity',
+                                0
+                            ]
+                        }
+                    },
+                    totalDhotiQuantity: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ['$otherType', 3] }, // Dhoti
+                                '$otherQuantity',
+                                0
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $sort: { '_id.year': 1, '_id.month': 1 },
+            },
+        ]);
+        res.status(200).json(aggregateData);
+    } catch (error) {
+        console.error('Error fetching aggregated data:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 
 
 app.listen(port,()=>{
