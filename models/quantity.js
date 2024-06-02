@@ -1,3 +1,4 @@
+// mongodb+srv://reiine:testpass@cluster0.u7inkuy.mongodb.net/FreshPress
 const mongoose = require('mongoose');
 mongoose.connect('mongodb+srv://reiine:testpass@cluster0.u7inkuy.mongodb.net/FreshPress')
     .then((res) => {
@@ -21,30 +22,21 @@ const quantitySchema = new mongoose.Schema({
         required: true,
     },
     date: {
-        type: {
-            day: {
-                type: Number,
-            },
-            month: {
-                type: Number,
-            },
-            year: {
-                type: Number,
-            }
+        day: {
+            type: Number,
+            required: true,
+        },
+        month: {
+            type: Number,
+            required: true,
+        },
+        year: {
+            type: Number,
+            required: true,
         }
     }
 });
 
-quantitySchema.pre('save', function(next) {
-    const currentDate = new Date();
-    this.date = {
-        day: currentDate.getDate(),
-        month: currentDate.getMonth() + 1,
-        year: currentDate.getFullYear()
-    };
-    next();
-});
-
-const quantity = mongoose.model('quantity', quantitySchema);
+const quantity = mongoose.model('Quantity', quantitySchema);
 
 module.exports = quantity;

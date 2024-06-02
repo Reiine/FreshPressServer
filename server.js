@@ -9,15 +9,20 @@ const port = 3000 || process.env.PORT;
 
 
 app.post('/add', async (req,res)=>{
-    const {normalQuantity,otherQuantity, otherType} = req.body; 
+    const {normalQuantity,otherQuantity, otherType,date, month} = req.body; 
     try {
         const quantitySchema = await quantity({
-            normalQuantity,otherQuantity, otherType
+            normalQuantity,otherQuantity, otherType,
+            date:{
+                day: date,
+                month: month,
+                year: new Date().getFullYear()
+            }
         })
         const saveQuantity = await quantitySchema.save();
         res.json("success");
     } catch (error) {
-        console.log("Error",error);
+        console.log("Error",error.response ? error.response.data : error.message);
     }
 })
 
