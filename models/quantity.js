@@ -1,4 +1,5 @@
 // mongodb+srv://reiine:testpass@cluster0.u7inkuy.mongodb.net/FreshPress
+
 const mongoose = require('mongoose');
 mongoose.connect('mongodb+srv://reiine:testpass@cluster0.u7inkuy.mongodb.net/FreshPress')
     .then((res) => {
