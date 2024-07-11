@@ -44,98 +44,71 @@ app.post('/get-data', async (req, res) => {
   }
 });
 
-app.post('/get-ag-data', async (req, res) => {
+app.post('/delete', async (req, res) => {
+  const {day, month, year} = req.body;
   try {
-    const aggregateData = await quantity.aggregate([
-      {
-        $group: {
-          _id: {
-            year: '$date.year',
-            month: '$date.month',
-          },
-          totalNormalQuantity: {$sum: '$normalQuantity'},
-          totalSaariQuantity: {
-            $sum: {
-              $cond: [
-                {$eq: ['$otherType', 2]}, // Saari
-                '$otherQuantity',
-                0,
-              ],
-            },
-          },
-          totalDhotiQuantity: {
-            $sum: {
-              $cond: [
-                {$eq: ['$otherType', 3]}, // Dhoti
-                '$otherQuantity',
-                0,
-              ],
-            },
-          },
-        },
-      },
-      {
-        $sort: {'_id.year': 1, '_id.month': 1},
-      },
-    ]);
-    res.status(200).json(aggregateData);
+    const deletedData = await quantity.deleteOne({
+      'date.day': day,
+      'date.month': month,
+      'date.year': year,
+    });
+    res.json({message: 'Data deleted successfully'});
   } catch (error) {
-    res.status(500).json({error: 'Internal server error'});
+    res.status(500).json({error: 'An error occurred'});
   }
 });
 
 app.post('/edit', async (req, res) => {
-    const {
-      day,
-      month,
-      year,
-      newDay,
-      newMonth,
-      newYear,
-      otherQuantity,
-      changeDate,
-    } = req.body;
-  
-    try {
-      // Find a document based on the date fields
-      const getData = await quantity.findOne({
-        'date.day': day,
-        'date.month': month,
-        'date.year': year,
-      });
-  
-      if (getData) {
-        const id = getData._id;
-        const updateFields = {};
-  
-        // Update date fields if changeDate is true
-        if (changeDate) {
-          updateFields['date.day'] = newDay;
-          updateFields['date.month'] = newMonth;
-          updateFields['date.year'] = newYear;
-        }
-  
-        // Update otherQuantity if provided
-        if (otherQuantity !== undefined) {
-          updateFields.normalQuantity = otherQuantity;
-        }
-  
-        // Only perform the update if there are fields to update
-        if (Object.keys(updateFields).length > 0) {
-          await quantity.updateOne({ _id: id }, { $set: updateFields });
-        }
-  
-        console.log(getData);
-        res.json({ getData: getData, message: 'Successfully edited' });
-      } else {
-        res.status(404).json({ error: 'No document found' });
+  const {
+    day,
+    month,
+    year,
+    newDay,
+    newMonth,
+    newYear,
+    otherQuantity,
+    changeDate,
+  } = req.body;
+
+  try {
+    // Find a document based on the date fields
+    const getData = await quantity.findOne({
+      'date.day': day,
+      'date.month': month,
+      'date.year': year,
+    });
+
+    if (getData) {
+      const id = getData._id;
+      const updateFields = {};
+
+      // Update date fields if changeDate is true
+      if (changeDate) {
+        updateFields['date.day'] = newDay;
+        updateFields['date.month'] = newMonth;
+        updateFields['date.year'] = newYear;
       }
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Server error' });
+
+      // Update otherQuantity if provided
+      if (otherQuantity !== undefined) {
+        updateFields.normalQuantity = otherQuantity;
+      }
+
+      // Only perform the update if there are fields to update
+      if (Object.keys(updateFields).length > 0) {
+        await quantity.updateOne({_id: id}, {$set: updateFields});
+      }
+
+      console.log(getData);
+      res.json({getData: getData, message: 'Successfully edited'});
+    } else {
+      res.status(404).json({error: 'No document found'});
     }
-  });
-  
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({error: 'Server error'});
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
